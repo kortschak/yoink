@@ -1,0 +1,32 @@
+env GOCACHE=$WORK
+
+yoink -y foo -dir .
+cmp script-simple_dep/main.go want/main.go
+
+-- go.mod --
+module t
+
+go 1.21
+-- main.go --
+package main
+
+// main is the entry.
+func main() {}
+
+// foo is a function.
+func foo() bar {
+	return bar{}
+}
+
+// bar is a type
+type bar struct{}
+-- want/main.go --
+package main
+
+// foo is a function.
+func foo() bar {
+	return bar{}
+}
+
+// bar is a type
+type bar struct{}

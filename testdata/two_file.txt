@@ -1,0 +1,39 @@
+env GOCACHE=$WORK
+
+yoink -y foo -dir .
+cmp script-two_file/main.go want/main.go
+! exists script-two_file/other.go
+
+rm script-two_file/main.go
+
+yoink -y foo,bar -dir .
+cmp script-two_file/main.go want/main.go
+cmp script-two_file/other.go want/other.go
+
+-- go.mod --
+module t
+
+go 1.21
+-- main.go --
+package main
+
+// main is the entry.
+func main() {}
+
+// foo is a function.
+func foo() {}
+-- other.go --
+package main
+
+// bar is a function.
+func bar() {}
+-- want/main.go --
+package main
+
+// foo is a function.
+func foo() {}
+-- want/other.go --
+package main
+
+// bar is a function.
+func bar() {}

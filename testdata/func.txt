@@ -1,0 +1,22 @@
+env GOCACHE=$WORK
+
+yoink -y foo -dir .
+cmp script-func/main.go want/main.go
+
+-- go.mod --
+module t
+
+go 1.21
+-- main.go --
+package main
+
+// main is the entry.
+func main() {}
+
+// foo is a function.
+func foo() {}
+-- want/main.go --
+package main
+
+// foo is a function.
+func foo() {}

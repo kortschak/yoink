@@ -1,0 +1,35 @@
+env GOCACHE=$WORK
+
+yoink -y foo,Baz -dir .
+cmp script-exported_dep_complex/main.go want/main.go
+
+-- go.mod --
+module t
+
+go 1.21
+-- main.go --
+package main
+
+// main is the entry.
+func main() {}
+
+// foo is a function.
+func foo(b Baz) Bar {
+	return Bar{}
+}
+
+// Bar is a type
+type Bar struct{}
+
+// Baz is a type
+type Baz struct{}
+-- want/main.go --
+package main
+
+// foo is a function.
+func foo(b Baz) main.Bar {
+	return main.Bar{}
+}
+
+// Baz is a type
+type Baz struct{}
