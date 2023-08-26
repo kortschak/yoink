@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s extglob
-rm -rf !(main).go unused
+rm -rf !(main|main_test).go unused
 mkdir tmp
 touch tmp/LICENSE
 git fetch https://github.com/dominikh/go-tools master
