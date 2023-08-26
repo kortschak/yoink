@@ -96,7 +96,9 @@ func (s set) String() string {
 // written to stdout.
 func yoink(pkgPath string, target map[string]bool, dir string, debug bool) int {
 	cfg := &packages.Config{
-		Mode: packages.NeedFiles |
+		Tests: true,
+		Mode: packages.NeedName |
+			packages.NeedFiles |
 			packages.NeedImports |
 			packages.NeedDeps |
 			packages.NeedSyntax |
@@ -118,7 +120,13 @@ func yoink(pkgPath string, target map[string]bool, dir string, debug bool) int {
 	}
 
 	var ar []txtar.File
-	for _, pkg := range pkgs { // pkgs should only ever be one long, ¯\_(ツ)_/¯.
+	for _, pkg := range pkgs {
+		// If there is no testing, pkgs will only have
+		// a single package, otherwise only work on the
+		// complete test package.
+		if len(pkgs) != 1 && !isTestPackage(pkg) {
+			continue
+		}
 		if debug {
 			unused.Debug = os.Stderr
 			unused.Run(&analysis.Pass{
@@ -296,6 +304,7 @@ func yoink(pkgPath string, target map[string]bool, dir string, debug bool) int {
 				Data: buf.Bytes(),
 			})
 		}
+		break
 	}
 
 	if dir != "" {
@@ -326,6 +335,12 @@ func yoink(pkgPath string, target map[string]bool, dir string, debug bool) int {
 		os.Stdout.Write(txtar.Format(&txtar.Archive{Files: ar}))
 	}
 	return success
+}
+
+// isTestPackage returns whether pkg is the complete package for pkg.test.
+func isTestPackage(pkg *packages.Package) bool {
+	_, test, ok := strings.Cut(pkg.ID, " ")
+	return ok && fmt.Sprintf("[%s.test]", pkg.PkgPath) == test
 }
 
 // deleteNode removes the ith ast.Node from s and returns the result.

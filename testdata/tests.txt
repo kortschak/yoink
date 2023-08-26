@@ -1,0 +1,64 @@
+env GOCACHE=$WORK
+
+yoink -y foo,Test -dir .
+cmp script-tests/main.go want/main.go
+cmp script-tests/main_test.go want/main_test.go
+
+-- go.mod --
+module t
+
+go 1.21
+-- main.go --
+package main
+
+// main is the entry.
+func main() {}
+
+// foo is a function.
+func foo() Bar {
+	return Bar{}
+}
+
+// unusedInMain is a function that is only used by tests.
+func unusedInMain() {}
+
+// Bar is a type
+type Bar struct{}
+-- main_test.go --
+package main
+
+import "testing"
+
+func Test(t *testing.T) {
+	unusedInMain()
+	bar()
+}
+
+// bar is a function.
+func bar() Bar {
+	return Bar{}
+}
+-- want/main.go --
+package main
+
+// foo is a function.
+func foo() main.Bar {
+	return main.Bar{}
+}
+
+// unusedInMain is a function that is only used by tests.
+func unusedInMain() {}
+-- want/main_test.go --
+package main
+
+import "testing"
+
+func Test(t *testing.T) {
+	unusedInMain()
+	bar()
+}
+
+// bar is a function.
+func bar() main.Bar {
+	return main.Bar{}
+}
